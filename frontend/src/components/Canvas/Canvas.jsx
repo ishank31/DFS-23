@@ -72,10 +72,16 @@ const constraintsBox = [
   },
 ];
 
+// const nnOptions = [
+//   "NULL",
+//   "Not NULL",
+//   // Add your specific options here for "Not Null"
+// ];
+
 const nnOptions = [
-  "NULL",
-  "Not NULL",
-  // Add your specific options here for "Not Null"
+  { value: "NULL", label: "NULL" },
+  { value: "NOT_NULL", label: "Not NULL" },
+  // Add more options with value and label properties as needed
 ];
 
 const unqOptions = [
@@ -163,7 +169,7 @@ function MultipleSelectChip({
       {constraintsBox.map((obj) => {
         return (
           <div>
-            <FormControl sx={{ m: 1, width: 260 }} size="small">
+            <FormControl sx={{ m: 1, width: 260 }} size="small" >
               <InputLabel id="demo-multiple-chip-label">{obj.label}</InputLabel>
               <Select
                 labelId="demo-multiple-chip-label"
@@ -188,9 +194,10 @@ function MultipleSelectChip({
                       gap: 0.5,
                       
                     }}
+                    
                   >
                     {selected.map((value) => (
-                      <Chip key={value} label={value.name} />
+                      <Chip key={value} label={value.name} className="chip-outline-black"/>
                     ))}
                   </Box>
                 )}
@@ -198,8 +205,8 @@ function MultipleSelectChip({
               >
                  
                 {obj.field === "not_null" && nnOptions.map((option) => (
-                  <MenuItem key={option} value={option}>
-                  {option}
+                  <MenuItem key={option.value} value={option.value} >
+                  {option.label}
                   </MenuItem>
                 ))}
 
@@ -242,6 +249,8 @@ export default function Canvas({
   const [eType, setEType] = useState("1:1");
   const [eData, setEData] = useState({});
   const [tableId, setTableId] = React.useState("");
+  const [nn, setNn] = useState([]); // Change: Not Null
+  const [unq, setUnq] = useState([]); // Change: Unique
   const [tableData, setTableData] = React.useState([]);
   const [undoArray, setUndoArray] = React.useState([]);
   const [redoArray, setRedoArray] = React.useState([]);
@@ -455,14 +464,14 @@ export default function Canvas({
   // );
 
   return (
-    <div style={{ width: "100%", height: "100%" }}>
-      <div
+    <div style={{ width: "100%", height: "100%"}}>
+      <div // Change: Control Panel properties
         style={{
           position: "absolute",
-          background: "rgba(200,200,200, 0.8)",
+          background: "#2d6a4f", // Change: Background color of the control panel
           padding: "10px",
           margin: "10px",
-          maxWidth: "350px",
+          maxWidth: "300px", // Change: Width of the control panel
           minWidth: "200px",
           zIndex: 100,
           justifyContent: "center",
@@ -480,10 +489,11 @@ export default function Canvas({
           fullWidth
           onClick={addNode}
           startIcon={<AddBoxIcon />}
+          style={{backgroundColor:"#40916c"}}
         >
-          Add a Node
+          <span style={{ fontSize: "1em" }}>Add a Node</span>
         </Button>
-        <div
+        <div  // Change: Undo,Save and Redo buttons
           style={{
             display: "flex",
             justifyContent: "center",
@@ -491,21 +501,23 @@ export default function Canvas({
             justifyItems: "space-between",
             width: "100%",
             gap: "4px",
+            // backgroundColor: "red"
           }}
         >
           <Button
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor:"#40916c" }}
             variant="contained"
             color="info"
             fullWidth
             onClick={undoCount}
             disabled={!canUndo}
             startIcon={<UndoIcon />}
+            
           >
-            Undo
+           <span style={{ fontSize: "1em" }}>Undo</span>
           </Button>
           <Button
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor:"#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -519,10 +531,10 @@ export default function Canvas({
             }}
             startIcon={<SaveIcon />}
           >
-            Save
+            <span style={{ fontSize: "1em" }}>Save</span>
           </Button>
           <Button
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor:"#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -530,7 +542,7 @@ export default function Canvas({
             disabled={!canRedo}
             startIcon={<RedoIcon />}
           >
-            Redo
+            <span style={{ fontSize: "1em" }}>Redo</span>
           </Button>
         </div>
         <div
@@ -544,7 +556,7 @@ export default function Canvas({
           }}
         >
           <Button
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor:"#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -554,10 +566,10 @@ export default function Canvas({
             }}
             startIcon={<PreviewIcon />}
           >
-            Preview
+           <span style={{ fontSize: "1em" }}>Preview</span>
           </Button>
           <Button
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor:"#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -577,7 +589,7 @@ export default function Canvas({
             }}
             startIcon={<CodeIcon />}
           >
-            View JSON
+            <span style={{ fontSize: "1em" }}>View JSON</span>
           </Button>
         </div>
         <div
@@ -591,7 +603,7 @@ export default function Canvas({
           }}
         >
           <Button
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor:"#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -603,7 +615,7 @@ export default function Canvas({
             <input type="file" hidden onChange={handleCapture} />
           </Button>
           <Button
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor:"#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -634,14 +646,14 @@ export default function Canvas({
               borderRadius: "5px",
               padding: "5px",
               margin: "5px",
-              backgroundColor: "cyan",
+              backgroundColor: "4CAF50",
               maxWidth: "300px",
             }}
           >
             <div
               style={{
                 padding: "5px",
-                backgroundColor: "rgba(0,0,0,0.1)",
+                backgroundColor: "#40916c",
                 borderRadius: "5px",
                 textAlign: "center",
               }}
@@ -663,11 +675,16 @@ export default function Canvas({
               borderRadius: "5px",
               padding: "5px",
               margin: "5px",
-              backgroundColor: "cyan",
+              backgroundColor: "#40916c",
               maxWidth: "280px",
             }}
           >
-            <Typography>
+            <Typography style={{
+                padding: "5px",
+                backgroundColor: "#40916c",
+                borderRadius: "5px",
+                textAlign: "center",
+              }}>
               CONSTRAINTS for <strong>{tableData.table.name}</strong>
             </Typography>
             <div
@@ -675,6 +692,7 @@ export default function Canvas({
                 width: "100%",
                 marginBottom: "5px",
                 maxWidth: "250px",
+              
               }}
             >
               <MultipleSelectChip
@@ -683,6 +701,7 @@ export default function Canvas({
                 tableData={tableData}
                 constraints={constraints}
                 setConstraints={setConstraints}
+                
               />
             </div>
           </div>
@@ -833,6 +852,7 @@ export default function Canvas({
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
+        style={{backgroundColor:"#E0E9EC"}}
       >
         <Controls />
         <MiniMap />

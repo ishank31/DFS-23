@@ -10,6 +10,11 @@
   max-width: fit-content !important;
 }
 
+/* To make the outline of the chip black */
+.chip-outline-black {
+  border: 1px solid black;
+}
+
 .am-line-name-c{
   display: flex;
   justify-content: space-between;

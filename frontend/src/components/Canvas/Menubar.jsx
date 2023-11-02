@@ -78,10 +78,10 @@ export default function Menubar({
   ];
 
   return (
-    <div class="div-center-vh">
+    <div class="div-center-vh" style={{color:"white"}}> {/*Change: Add color white after fixing CSS*/}
       {/* <div> */}
       <Grid container spacing={2} p={1}>
-        <Grid item xs={6}>
+        <Grid item xs={6} style={{backgroundColor:"#198754"}}>
           <div style={{
             display: "flex",
             alignItems:"baseline",
@@ -98,7 +98,7 @@ export default function Menubar({
                 transform: "rotate(180deg) translate(0px,-5px)",
               }}
             />
-          <Typography variant="h4">Project: {config.projectName}</Typography>
+          <Typography variant="h4" style={{fontSize: "30px", color:"white"}}>Project: {config.projectName}</Typography> {/*Change: Add color to white after fixing CSS*/}
           <p style={{
             color: "grey",
             marginLeft: "10px",
@@ -109,11 +109,11 @@ export default function Menubar({
             fontWeight: "bold",
             padding: "0px",
           }}>|</p>
-          <Typography variant="body">{" "}Version {config.version}</Typography>
+          <Typography variant="body" style={{color:"white"}}>{" "}Version {config.version}</Typography>{/*Change: Add color to white after fixing CSS*/}
         </div>
         </Grid>
-        <Grid item xs={3}></Grid>
-        <Grid item xs={3} alignContent="right">
+        <Grid item xs={3} style={{backgroundColor:"#198754"}}></Grid>
+        <Grid item xs={3} alignContent="right" style={{backgroundColor:"#198754", margin:"0px"}}>{/*Avatar and Username section*/}
           <div
             style={{
               display: "flex",
@@ -121,13 +121,14 @@ export default function Menubar({
               justifyItems: "end",
               alignItems: "center",
               gap: "10px",
+              marginRight: "-10px"
             }}
           >
-            <div>
+            <div >
               <Avatar />
             </div>
             <div>
-              <Typography variant="h5">{config.user.name}</Typography>
+              <Typography variant="h5" style={{fontSize: "20px", color:"white"}}>{config.user.name}</Typography>{/*Change: Add color to white after fixing CSS*/}
             </div>
           </div>
         </Grid>
