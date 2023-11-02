@@ -1,4 +1,4 @@
-# UI for Data Ingestion : Team NULL
+# UI for Data Ingestion : Team AttentionIsAllYouNeed
 ## Description 
 This repo only contains code for shell part which enables user can design the structure of there SQL database the can start from fresh and export it or edit a exiting work by importing the exported json file or continue the saved session and visualize it.
 ## Some Screenshots  
@@ -35,9 +35,9 @@ This repo only contains code for shell part which enables user can design the st
 ### {: happy designing :}
 
 > # Creators 
-> + Archit Jain
-> + Pulkit Gupta
-> + Harshita Upadhya
+> + Ishan Kavathekar
+> + Aaryan Sharma
+
 
 + screenshots > https://hackmd.io/XQlaqnf6Rjm9NlSJZVUHhw 
 + task division > https://hackmd.io/o1JVJ44AS0aMf6gdW_q7sg
