@@ -1,5 +1,5 @@
 import React from "react";
-import { CanvasContextProvider } from "../context/canvasContext";
+import { CanvasContextProvider } from "../context/CanvasContext";
 import CanvasTest from "../components/Canvas/test";
 import Canvas from "../components/Canvas/Canvas";
 import Menubar from "../components/Canvas/Menubar";
