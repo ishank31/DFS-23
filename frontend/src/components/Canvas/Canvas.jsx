@@ -432,9 +432,9 @@ export default function Canvas({
       data.fk2 = nodes.filter((x) => x.id === fk2ID)[0].data.name;
       data.source = connection.source;
       data.target = connection.target;
-      data.sourceHandle = connection.sourceHandle;
-      data.targetHandle = connection.targetHandle;
-      data.id = "edge_" + connection.source + "_" + connection.target;
+      // data.sourceHandle = connection.sourceHandle;
+      // data.targetHandle = connection.targetHandle;
+      // data.id = "edge_" + connection.source + "_" + connection.target;
       data.type = "buttonedge";
       data.RType = eType;
       console.log(data);
@@ -719,7 +719,7 @@ export default function Canvas({
       >
         <DialogTitle>
           {eName === "edge"
-            ? "Realtion"
+            ? "Relation"
             : eName === "preview"
               ? "Preview"
               : "NONE"}
@@ -755,16 +755,16 @@ export default function Canvas({
                 <br />
                 <br />
                 <TextField
-                  label="Foriegn Key 1"
-                  disabled
+                  label="Table 1 Foreign Key"
+                  // disabled
                   defaultValue={eData.fk1}
                   fullWidth
                 />
                 <br />
                 <br />
                 <TextField
-                  label="Foriegn Key 2"
-                  disabled
+                  label="Table 2 Foreign Key"
+                  // disabled
                   defaultValue={eData.fk2}
                   fullWidth
                 />
@@ -772,7 +772,7 @@ export default function Canvas({
                 <br />
                 <TextField
                   label="Table 1"
-                  disabled
+                  // disabled
                   defaultValue={eData.tb1}
                   fullWidth
                 />
@@ -780,7 +780,7 @@ export default function Canvas({
                 <br />
                 <TextField
                   label="Table 2"
-                  disabled
+                  // disabled
                   defaultValue={eData.tb2}
                   fullWidth
                 />

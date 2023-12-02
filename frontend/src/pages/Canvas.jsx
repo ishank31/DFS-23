@@ -113,7 +113,7 @@ export default function CanvasPage() {
                     <pre>{JSON.stringify(modalData.data.nodes, null, 2)}</pre>
                   </div>
                   <Divider />
-                  <Typography>Edges</Typography>
+                  <Typography>Relationships</Typography>
                   <div
                     style={{
                       height: "100%",
