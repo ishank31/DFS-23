@@ -156,12 +156,12 @@ function MultipleSelectChip({
 
   const handleChangeConstraint = (event, name) => {
     name === "not_null"
-    ? setNn(event.target.value)
-    : name === "unique"
-    ? setUnq(event.target.value)
-    : name === "primary_key"
-    ? setPk(event.target.value)
-    : setFk(event.target.value);
+      ? setNn(event.target.value)
+      : name === "unique"
+        ? setUnq(event.target.value)
+        : name === "primary_key"
+          ? setPk(event.target.value)
+          : setFk(event.target.value);
   };
 
   return (
@@ -179,10 +179,10 @@ function MultipleSelectChip({
                   obj.field === "not_null"
                     ? nn
                     : obj.field === "unique"
-                    ? unq
-                    : obj.field === "primary_key"
-                    ? pk
-                    : fk
+                      ? unq
+                      : obj.field === "primary_key"
+                        ? pk
+                        : fk
                 }
                 onChange={(e) => handleChangeConstraint(e, obj.field)}
                 input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
@@ -192,21 +192,21 @@ function MultipleSelectChip({
                       display: "flex",
                       flexWrap: "wrap",
                       gap: 0.5,
-                      
+
                     }}
-                    
+
                   >
                     {selected.map((value) => (
-                      <Chip key={value} label={value.name} className="chip-outline-black"/>
+                      <Chip key={value} label={value.name} className="chip-outline-black" />
                     ))}
                   </Box>
                 )}
                 MenuProps={MenuProps}
               >
-                 
+
                 {obj.field === "not_null" && nnOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value} >
-                  {option.label}
+                    {option.label}
                   </MenuItem>
                 ))}
 
@@ -219,11 +219,11 @@ function MultipleSelectChip({
                 {(obj.field === "primary_key" || obj.field === "foreign_key") && (
                   tableData.attributes.map((name) => (
                     <MenuItem key={name.id} value={name}>
-                    {name.name}
+                      {name.name}
                     </MenuItem>
                   ))
                 )}
-                
+
               </Select>
             </FormControl>
           </div>
@@ -240,7 +240,9 @@ export default function Canvas({
   setOpen,
   setModalData,
   exportJSON,
-}) {
+}) 
+
+{
   const [nodes, setNodes] = React.useState(initialNodes);
   const [edges, setEdges] = React.useState(initialEdges);
   const [constraints, setConstraints] = React.useState({});
@@ -266,7 +268,7 @@ export default function Canvas({
     },
   ] = useUndo({});
   const { present: localStore } = local;
-  const onImport = () => {};
+  const onImport = () => { };
 
   const handleCapture = ({ target }) => {
     const fileReader = new FileReader();
@@ -464,7 +466,7 @@ export default function Canvas({
   // );
 
   return (
-    <div style={{ width: "100%", height: "100%"}}>
+    <div style={{ width: "100%", height: "100%" }}>
       <div // Change: Control Panel properties
         style={{
           position: "absolute",
@@ -489,7 +491,7 @@ export default function Canvas({
           fullWidth
           onClick={addNode}
           startIcon={<AddBoxIcon />}
-          style={{backgroundColor:"#40916c"}}
+          style={{ backgroundColor: "#40916c" }}
         >
           <span style={{ fontSize: "1em" }}>Add a Node</span>
         </Button>
@@ -505,19 +507,19 @@ export default function Canvas({
           }}
         >
           <Button
-            style={{ flex: 1, backgroundColor:"#40916c" }}
+            style={{ flex: 1, backgroundColor: "#40916c" }}
             variant="contained"
             color="info"
             fullWidth
             onClick={undoCount}
             disabled={!canUndo}
             startIcon={<UndoIcon />}
-            
+
           >
-           <span style={{ fontSize: "1em" }}>Undo</span>
+            <span style={{ fontSize: "1em" }}>Undo</span>
           </Button>
           <Button
-            style={{ flex: 1, backgroundColor:"#40916c" }}
+            style={{ flex: 1, backgroundColor: "#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -534,7 +536,7 @@ export default function Canvas({
             <span style={{ fontSize: "1em" }}>Save</span>
           </Button>
           <Button
-            style={{ flex: 1, backgroundColor:"#40916c" }}
+            style={{ flex: 1, backgroundColor: "#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -556,7 +558,7 @@ export default function Canvas({
           }}
         >
           <Button
-            style={{ flex: 1, backgroundColor:"#40916c" }}
+            style={{ flex: 1, backgroundColor: "#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -566,10 +568,10 @@ export default function Canvas({
             }}
             startIcon={<PreviewIcon />}
           >
-           <span style={{ fontSize: "1em" }}>Preview</span>
+            <span style={{ fontSize: "1em" }}>Preview</span>
           </Button>
           <Button
-            style={{ flex: 1, backgroundColor:"#40916c" }}
+            style={{ flex: 1, backgroundColor: "#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -603,7 +605,7 @@ export default function Canvas({
           }}
         >
           <Button
-            style={{ flex: 1, backgroundColor:"#40916c" }}
+            style={{ flex: 1, backgroundColor: "#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -615,7 +617,7 @@ export default function Canvas({
             <input type="file" hidden onChange={handleCapture} />
           </Button>
           <Button
-            style={{ flex: 1, backgroundColor:"#40916c" }}
+            style={{ flex: 1, backgroundColor: "#40916c" }}
             variant="contained"
             color="info"
             fullWidth
@@ -633,7 +635,7 @@ export default function Canvas({
             Export
           </Button>
         </div>
-        
+
         {tableId === "" ? (
           <div
             style={{
@@ -680,11 +682,11 @@ export default function Canvas({
             }}
           >
             <Typography style={{
-                padding: "5px",
-                backgroundColor: "#40916c",
-                borderRadius: "5px",
-                textAlign: "center",
-              }}>
+              padding: "5px",
+              backgroundColor: "#40916c",
+              borderRadius: "5px",
+              textAlign: "center",
+            }}>
               CONSTRAINTS for <strong>{tableData.table.name}</strong>
             </Typography>
             <div
@@ -692,7 +694,7 @@ export default function Canvas({
                 width: "100%",
                 marginBottom: "5px",
                 maxWidth: "250px",
-              
+
               }}
             >
               <MultipleSelectChip
@@ -701,7 +703,7 @@ export default function Canvas({
                 tableData={tableData}
                 constraints={constraints}
                 setConstraints={setConstraints}
-                
+
               />
             </div>
           </div>
@@ -719,8 +721,8 @@ export default function Canvas({
           {eName === "edge"
             ? "Realtion"
             : eName === "preview"
-            ? "Preview"
-            : "NONE"}
+              ? "Preview"
+              : "NONE"}
         </DialogTitle>
         <DialogContent dividers={true}>
           <DialogContentText>
@@ -852,7 +854,7 @@ export default function Canvas({
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        style={{backgroundColor:"#E0E9EC"}}
+        style={{ backgroundColor: "#E0E9EC" }}
       >
         <Controls />
         <MiniMap />
