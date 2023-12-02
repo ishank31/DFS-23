@@ -5,3 +5,6 @@
 # Features
 
 - [ ] CSV import export functionality
+- [ ] User Authentication
+- [ ] Testing
+- [ ] Containerization
