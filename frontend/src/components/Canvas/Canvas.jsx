@@ -43,6 +43,59 @@ import RedoIcon from "@mui/icons-material/Redo";
 import PreviewIcon from "@mui/icons-material/Preview";
 import CodeIcon from "@mui/icons-material/Code";
 
+function generateJsonSchema(headers, fileName) {
+  const entityName = fileName.split('.')[0];
+  const rawData = {
+      nodes: [],
+      edges: [],
+      constraints: {}
+  };
+
+  // Add parent node
+  rawData.nodes.push({
+      id: "1",
+      type: "parent",
+      position: { x: 10, y: 10 },
+      data: {
+          tableName: entityName.toLowerCase(),
+          link_to_file: "/",
+          attribute_count: headers.length
+      },
+      style: {
+          width: 244,
+          height: 270
+      }
+  });
+
+  // Add child nodes for each header
+  headers.forEach((header, index) => {
+      rawData.nodes.push({
+          id: `1_${index}`,
+          type: "child",
+          position: { x: 10, y: 50 + (70 * index) },
+          data: {
+              name: header,
+              type: inferDataType(header) // Simple function to infer data type
+          },
+          parentNode: "1",
+          extent: "parent",
+          draggable: false,
+          style: {
+              width: 224
+          }
+      });
+  });
+
+  return { rawData };
+}
+
+function inferDataType(header) {
+  // A simple and not exhaustive inference function for the data type
+  if (header.toLowerCase().includes('id')) return 'Obj';
+  if (header.toLowerCase().includes('name')) return 'string';
+  if (header.toLowerCase().includes('val')) return 'num';
+  return 'string'; // Default type
+}
 // const CanvasPreview = React.lazy(() => import("./canvasPreview.jsx"));
 
 const constraintsBox = [
@@ -272,17 +325,52 @@ export default function Canvas({
 
   const handleCapture = ({ target }) => {
     const fileReader = new FileReader();
-    const name = target.accept.includes("image") ? "images" : "videos";
+    // const name = target.accept.includes("image") ? "images" : "videos";
 
-    fileReader.readAsDataURL(target.files[0]);
-    fileReader.onload = (e) => {
-      let dataURI = e.target.result;
-      const json = atob(dataURI.substring(29));
-      const result = JSON.parse(json);
-      setNodes(result.rawData.nodes);
-      setEdges(result.rawData.edges);
-      setConstraints(result.rawData.constraints);
-    };
+    // fileReader.readAsDataURL(target.files[0]);
+    // fileReader.onload = (e) => {
+    //   let dataURI = e.target.result;
+    //   const json = atob(dataURI.substring(29));
+    //   const result = JSON.parse(json);
+    //   setNodes(result.rawData.nodes);
+    //   setEdges(result.rawData.edges);
+    //   setConstraints(result.rawData.constraints);
+    // };
+    
+    // Check if the selected file has a CSV MIME type
+    if (target.files[0].type === "text/csv") {
+    // Example usage
+    // const headers = ['_id', 'Name', 'val'];
+    // const fileName = 'OrgId.csv';
+    // const schema = generateJsonSchema(headers, fileName);
+
+    // console.log(JSON.stringify(schema, null, 2));
+
+      fileReader.readAsText(target.files[0]);
+      const file_name = target.files[0].name;
+      fileReader.onload = (e) => {
+        let csvData = e.target.result;
+        // Parse the CSV data into an array or process it as needed
+        // For example, you can use a CSV parsing library or split the lines manually
+        const rows = csvData.split('\n');
+        const header = rows[0].split(',');
+        console.log(header);
+        console.log(rows.slice(1));
+        console.log(file_name); 
+        const schema = generateJsonSchema(header, file_name);
+        console.log('schema ', schema)
+        setNodes(schema.rawData.nodes);
+
+        // Assuming you want to set some state variables with the CSV data
+        // Example:
+        // setCSVHeader(header);
+        // setCSVData(rows.slice(1)); // Skip the header row
+      };
+    } else {
+      // Handle the case where a non-CSV file is selected (e.g., show an error message)
+      console.log("Please select a CSV file.");
+    }
+
   };
   const handleChangeConstraint = (event, name) => {
     console.log(event.target.value, name, tableId);
