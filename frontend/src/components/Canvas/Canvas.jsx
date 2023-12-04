@@ -298,6 +298,9 @@ export default function Canvas({
 {
   const [nodes, setNodes] = React.useState(initialNodes);
   const [edges, setEdges] = React.useState(initialEdges);
+  useEffect(() => {
+    console.log('Updated Edges:', edges);
+  }, [edges]);
   const [constraints, setConstraints] = React.useState({});
   const [eOpen, setEOpen] = useState(false);
   const [eName, setEName] = useState("");
@@ -504,9 +507,9 @@ export default function Canvas({
   );
   const onConnect = useCallback(
     (connection) => {
-      console.log(connection);
+      {/*console.log(connection);*/}
       let nodes = JSON.parse(localStorage.getItem("null-db1-data")).nodes || [];
-      console.log(nodes);
+     {/*console.log(nodes);*/}
       let data = {};
       let tb1ID = connection.source.split("_")[0];
       let fk1ID =
@@ -831,6 +834,7 @@ export default function Canvas({
                   fullWidth
                   required
                   onChange={(e) => {
+                    console.log('New value:', e.target.value);
                     setEType(e.target.value);
                   }}
                 >
