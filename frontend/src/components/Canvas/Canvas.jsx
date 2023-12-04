@@ -68,7 +68,7 @@ function generateJsonSchema(headers, fileName) {
       },
       style: {
           width: 244,
-          height: 270
+          height: 90*(headers.length-1)+15,
       }
   });
 
@@ -337,6 +337,12 @@ export default function Canvas({
 
   const handleCapture = ({ target }) => {
     const fileReader = new FileReader();
+    if (target.files.length > 1) {
+      console.log("Number of files selected: ", target.files.length);
+    }
+    else if(target.files.length === 1) {
+      console.log("1 file selected")
+    }
     // const name = target.accept.includes("image") ? "images" : "videos";
 
     // fileReader.readAsDataURL(target.files[0]);
@@ -372,8 +378,8 @@ export default function Canvas({
         const schema = generateJsonSchema(header, file_name);
         console.log('schema ', schema)
         setNodes(schema.rawData.nodes);
-        // setEdges(schema.rawData.edges);
-        // setConstraints(schema.rawData.constraints);
+        setEdges(schema.rawData.edges);
+        setConstraints(schema.rawData.constraints);
 
       };
     } else {
