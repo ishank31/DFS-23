@@ -109,6 +109,7 @@ function CustomNodeView({ id, data, constraints }) {
                 backgroundColor: "rgba(230, 230, 230, 1)",
                 padding: "0px 5px",
                 borderRadius: "25px",
+                
                 display: "flex",
               }}
             >

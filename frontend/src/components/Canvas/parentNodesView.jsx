@@ -106,7 +106,7 @@ function ParentNodeView({
     <>
       <div
         style={{
-          border: "1px solid black",
+          border: "10px solid black",
           height: "100%",
           width: "100%",
             borderRadius: "10px",

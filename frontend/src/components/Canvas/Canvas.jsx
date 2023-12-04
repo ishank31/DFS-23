@@ -367,21 +367,19 @@ export default function Canvas({
         const rows = csvData.split('\n');
         const header = rows[0].split(',');
         console.log(header);
-        console.log(rows.slice(1));
+        // console.log(rows.slice(1));
         console.log(file_name); 
         const schema = generateJsonSchema(header, file_name);
         console.log('schema ', schema)
         setNodes(schema.rawData.nodes);
-        setEdges(schema.rawData.edges);
-        setConstraints(schema.rawData.constraints);
+        // setEdges(schema.rawData.edges);
+        // setConstraints(schema.rawData.constraints);
 
-        // Assuming you want to set some state variables with the CSV data
-        // Example:
-        // setCSVHeader(header);
-        // setCSVData(rows.slice(1)); // Skip the header row
       };
     } else {
       // Handle the case where a non-CSV file is selected (e.g., show an error message)
+      // alert
+      alert("Please select a CSV file!");
       console.log("Please select a CSV file.");
     }
 
