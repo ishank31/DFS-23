@@ -44,6 +44,7 @@ import PreviewIcon from "@mui/icons-material/Preview";
 import CodeIcon from "@mui/icons-material/Code";
 
 function generateJsonSchema(headers, fileName) {
+  console.log('headers', headers)
   const entityName = fileName.split('.')[0];
   const rawData = {
       nodes: [],
@@ -51,6 +52,7 @@ function generateJsonSchema(headers, fileName) {
       constraints: {}
   };
 
+  const attributes = headers.map((header) => ({ name: header, type: 'String', is_unique_identifier: 'false' }));
   // Add parent node
   rawData.nodes.push({
       id: "1",
@@ -58,8 +60,11 @@ function generateJsonSchema(headers, fileName) {
       position: { x: 10, y: 10 },
       data: {
           tableName: entityName.toLowerCase(),
-          link_to_file: "/",
-          attribute_count: headers.length
+          // link to file should be entityName.csv
+          link_to_file: entityName.toLowerCase() + '.csv',
+          attribute_count: headers.length,
+          // add attributes section and add attribute name and type for all elements in headers
+          attributes: attributes
       },
       style: {
           width: 244,
@@ -301,6 +306,10 @@ export default function Canvas({
   useEffect(() => {
     console.log('Updated Edges:', edges);
   }, [edges]);
+  useEffect(() => {
+    console.log('Updated Nodes:', nodes);
+  }, [nodes]);
+
   const [constraints, setConstraints] = React.useState({});
   const [eOpen, setEOpen] = useState(false);
   const [eName, setEName] = useState("");
@@ -363,6 +372,8 @@ export default function Canvas({
         const schema = generateJsonSchema(header, file_name);
         console.log('schema ', schema)
         setNodes(schema.rawData.nodes);
+        setEdges(schema.rawData.edges);
+        setConstraints(schema.rawData.constraints);
 
         // Assuming you want to set some state variables with the CSV data
         // Example:
@@ -537,13 +548,15 @@ export default function Canvas({
   );
 
   const deleteTable = (id) => {
+    console.log('id' , id)
     let newNode = nodes.filter((x) => x.id.split("_")[0] != id.toString());
     let newEdge = edges.filter(
       (x) =>
         x.source.split("_")[0] != id.toString() &&
         x.target.split("_")[0] != id.toString()
     );
-    // console.log(newNode)
+    console.log('newNodes',newNode)
+    console.log('newEdge',newEdge)
     setNodes(newNode);
     setEdges(newEdge);
   };
