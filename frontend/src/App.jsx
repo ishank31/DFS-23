@@ -2,7 +2,7 @@ import React, { useState, Suspense, useEffect } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./styles/App.css";
-import axios from 'axios';
+import axios from 'redaxios';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 const Home = React.lazy(() => import("./pages/Home"));
