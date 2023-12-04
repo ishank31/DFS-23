@@ -17,12 +17,19 @@ import { Divider, Typography } from "@mui/material";
 //   edges as initialEdges,
 // } from "../components/Canvas/data.jsx";
 import ReactFlow, { ReactFlowProvider, useReactFlow } from 'reactflow';
+
+const dfs_user = localStorage.getItem("dfs-user");
+const config1 = JSON.parse(dfs_user);
+const first_name = config1.user.first_name;
+const last_name = config1.user.last_name;
+const name = first_name + " " + last_name;
+const email = config1.user.user_email;
 const config = {
   projectName: "DB2",
   version: "2.3.5",
   user:{
-    name:"John Doe",
-    email:"John.doe@students.iiit.ac.in",
+    name:name,
+    email:email,
   }
 };
 
