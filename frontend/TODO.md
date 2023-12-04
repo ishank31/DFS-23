@@ -8,3 +8,8 @@
 - [ ] User Authentication
 - [ ] Testing
 - [ ] Containerization
+
+# To do
+- [ ] User authentication
+- [ ] Deletion of Relationships
+- [ ] Multiple file imports
