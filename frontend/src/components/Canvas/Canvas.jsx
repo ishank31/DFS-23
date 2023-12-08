@@ -139,7 +139,7 @@ const constraintsBox = [
 const nnOptions = [
   { value: "NULL", label: "NULL" },
   { value: "NOT_NULL", label: "Not NULL" },
-  // Add more options with value and label properties as needed
+  // Add more options with value and label properties as needed 
 ];
 
 const unqOptions = [
@@ -335,6 +335,64 @@ export default function Canvas({
   const { present: localStore } = local;
   const onImport = () => { };
 
+  const file_names = [];
+  const headers = [];
+
+function processFile(file) {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+
+    if (file.type === "text/csv") {
+      fileReader.readAsText(file);
+
+      const file_name = file.name;
+      file_names.push(file_name);
+      const columnUniqueValues = {};
+      fileReader.onload = (e) => {
+        let csvData = e.target.result;
+        const rows = csvData.split('\n');
+        const header = rows[0].split(',').map(column => column.trim());;
+        headers.push(header);
+        console.log("header for the file: ", header);
+        console.log("file name for the file", file_name);
+
+        header.forEach(column => {
+          columnUniqueValues[column] = new Set();
+        });
+
+        // Iterate through rows and update unique values for each column
+        rows.slice(1).forEach(row => {
+          const values = row.split(',');
+          header.forEach((column, index) => {
+            columnUniqueValues[column].add(values[index]);
+          });
+        });
+
+        // Print columns with unique values
+        Object.keys(columnUniqueValues).forEach(column => {
+          const uniqueValues = Array.from(columnUniqueValues[column]);
+          if (uniqueValues.length === rows.length - 1) {
+            console.log(`Column ${column} has unique values in each row.`);
+          }
+        });
+
+        resolve(); // Resolve the promise when processing is complete
+      };
+
+      fileReader.onerror = (e) => {
+        reject("Error reading the file");
+      };
+    } else {
+      reject("File format of the selected file is not CSV");
+    }
+  });
+}
+
+  const fileProcessingPromises = [];
+
+
+
+
   const handleCapture = ({ target }) => {
     const fileReader = new FileReader();
     if (target.files.length > 1) {
@@ -354,7 +412,34 @@ export default function Canvas({
     //   setEdges(result.rawData.edges);
     //   setConstraints(result.rawData.constraints);
     // };
-    
+    for (let i = 0; i < target.files.length; i++) {
+      fileProcessingPromises.push(processFile(target.files[i]));
+    }
+
+    // Use Promise.all to wait for all promises to resolve
+    Promise.all(fileProcessingPromises)
+      .then(() => {
+      // This code will run after all files have been processed
+      for (let i = 0; i < file_names.length - 1; i++) {
+        for (let j = i + 1; j < file_names.length; j++) {
+          const commonHeaders = headers[i].filter(header => headers[j].includes(header));
+
+          if (commonHeaders.length > 0) {
+            console.log(`Common headers between ${file_names[i]} and ${file_names[j]}:`, commonHeaders);
+            console.log(`Tables: ${file_names[i]}, ${file_names[j]}`);
+          } else {
+            console.log(`No common headers between ${file_names[i]} and ${file_names[j]}.`);
+          }
+        }
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+
+
+
     // Check if the selected file has a CSV MIME type
     if (target.files[0].type === "text/csv") {
     // Example usage
@@ -722,7 +807,7 @@ export default function Canvas({
             startIcon={<PublishIcon />}
           >
             Import
-            <input type="file" hidden onChange={handleCapture} />
+            <input type="file" multiple hidden onChange={handleCapture} />
           </Button>
           <Button
             style={{ flex: 1, backgroundColor: "#40916c" }}
