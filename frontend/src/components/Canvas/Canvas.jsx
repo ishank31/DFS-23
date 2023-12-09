@@ -43,56 +43,82 @@ import RedoIcon from "@mui/icons-material/Redo";
 import PreviewIcon from "@mui/icons-material/Preview";
 import CodeIcon from "@mui/icons-material/Code";
 
-function generateJsonSchema(headers, fileName) {
-  console.log('headers', headers)
-  const entityName = fileName.split('.')[0];
-  const rawData = {
-      nodes: [],
-      edges: [],
-      constraints: {}
+function generateJsonStructure(filenames, headers) {
+  const determineType = (header) => {
+    const lowerHeader = header.toLowerCase();
+    if (lowerHeader === 'name' || lowerHeader === 'phno') {
+      return 'string';
+    } else if (lowerHeader === '_id') {
+      return 'Obj';
+    } else {
+      return 'num';
+    }
   };
 
-  const attributes = headers.map((header) => ({ name: header, type: 'String', is_unique_identifier: 'false' }));
-  // Add parent node
-  rawData.nodes.push({
-      id: "1",
+  const tables = filenames.map((filename, index) => {
+    return {
+      link_to_file: "/",
+      table_name: filename.split('.')[0],
+      attributes: headers[index].map(name => ({ name, type: determineType(name) })),
+      attribute_count: headers[index].length,
+      constraints: {}
+    };
+  });
+
+  const nodes = tables.flatMap((table, i) => {
+    const parent = {
+      id: `${i + 1}`,
       type: "parent",
-      position: { x: 10, y: 10 },
+      position: { x: 10, y: 10 + i * 300 },
       data: {
-          tableName: entityName.toLowerCase(),
-          // link to file should be entityName.csv
-          link_to_file: entityName.toLowerCase() + '.csv',
-          attribute_count: headers.length,
-          // add attributes section and add attribute name and type for all elements in headers
-          attributes: attributes
+        tableName: table.table_name,
+        link_to_file: "/",
+        attribute_count: table.attribute_count
       },
       style: {
-          width: 244,
-          height: 90*(headers.length-1)+15,
+        width: 244,
+        height: 90 + 70 * table.attribute_count
       }
+    };
+    const children = table.attributes.map((attr, j) => {
+      return {
+        id: `${i + 1}_${j}`,
+        type: "child",
+        position: { x: 10, y: 50 + j * 70 },
+        data: attr,
+        parentNode: `${i + 1}`,
+        extent: "parent",
+        draggable: false,
+        style: { width: 224 }
+      };
+    });
+    return [parent, ...children];
   });
 
-  // Add child nodes for each header
-  headers.forEach((header, index) => {
-      rawData.nodes.push({
-          id: `1_${index}`,
-          type: "child",
-          position: { x: 10, y: 50 + (70 * index) },
-          data: {
-              name: header,
-              type: inferDataType(header) // Simple function to infer data type
-          },
-          parentNode: "1",
-          extent: "parent",
-          draggable: false,
-          style: {
-              width: 224
-          }
-      });
-  });
+  const finalStructure = {
+    table_num: filenames.length,
+    tables,
+    relations: [],
+    rawData: {
+      nodes,
+      edges: [],
+      constraints: {}
+    }
+  };
 
-  return { rawData };
+  return JSON.stringify(finalStructure, null, 4);
 }
+
+// Example usage:
+const filenames = ['employee.csv', 'employee_phone.csv'];
+const headers = [
+  ['_id', 'Name', 'val'],
+  ['_id', 'phno']
+];
+
+// const jsonOutput = generateJsonStructure(filenames, headers);
+// console.log(jsonOutput);
+
 
 function inferDataType(header) {
   // A simple and not exhaustive inference function for the data type
@@ -298,9 +324,7 @@ export default function Canvas({
   setOpen,
   setModalData,
   exportJSON,
-}) 
-
-{
+}) {
   const [nodes, setNodes] = React.useState(initialNodes);
   const [edges, setEdges] = React.useState(initialEdges);
   useEffect(() => {
@@ -334,59 +358,60 @@ export default function Canvas({
   ] = useUndo({});
   const { present: localStore } = local;
   const onImport = () => { };
-
   const file_names = [];
   const headers = [];
 
-function processFile(file) {
-  return new Promise((resolve, reject) => {
-    const fileReader = new FileReader();
+  function processFile(file) {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
 
-    if (file.type === "text/csv") {
-      fileReader.readAsText(file);
+      if (file.type === "text/csv") {
+        fileReader.readAsText(file);
 
-      const file_name = file.name;
-      file_names.push(file_name);
-      const columnUniqueValues = {};
-      fileReader.onload = (e) => {
-        let csvData = e.target.result;
-        const rows = csvData.split('\n');
-        const header = rows[0].split(',').map(column => column.trim());;
-        headers.push(header);
-        console.log("header for the file: ", header);
-        console.log("file name for the file", file_name);
+        const file_name = file.name;
+        file_names.push(file_name);
+        const columnUniqueValues = {};
+        fileReader.onload = (e) => {
+          let csvData = e.target.result;
+          const rows = csvData.split('\n');
+          const header = rows[0].split(',').map(column => column.trim());;
+          headers.push(header);
+          console.log("header for the file: ", header);
+          // all_headers.push(header);
+          console.log("file name for the file", file_name);
+          // all_file_names.push(file_name);
 
-        header.forEach(column => {
-          columnUniqueValues[column] = new Set();
-        });
-
-        // Iterate through rows and update unique values for each column
-        rows.slice(1).forEach(row => {
-          const values = row.split(',');
-          header.forEach((column, index) => {
-            columnUniqueValues[column].add(values[index]);
+          header.forEach(column => {
+            columnUniqueValues[column] = new Set();
           });
-        });
 
-        // Print columns with unique values
-        Object.keys(columnUniqueValues).forEach(column => {
-          const uniqueValues = Array.from(columnUniqueValues[column]);
-          if (uniqueValues.length === rows.length - 1) {
-            console.log(`Column ${column} has unique values in each row.`);
-          }
-        });
+          // Iterate through rows and update unique values for each column
+          rows.slice(1).forEach(row => {
+            const values = row.split(',');
+            header.forEach((column, index) => {
+              columnUniqueValues[column].add(values[index]);
+            });
+          });
 
-        resolve(); // Resolve the promise when processing is complete
-      };
+          // Print columns with unique values
+          Object.keys(columnUniqueValues).forEach(column => {
+            const uniqueValues = Array.from(columnUniqueValues[column]);
+            if (uniqueValues.length === rows.length - 1) {
+              console.log(`Column ${column} has unique values in each row.`);
+            }
+          });
 
-      fileReader.onerror = (e) => {
-        reject("Error reading the file");
-      };
-    } else {
-      reject("File format of the selected file is not CSV");
-    }
-  });
-}
+          resolve(); // Resolve the promise when processing is complete
+        };
+
+        fileReader.onerror = (e) => {
+          reject("Error reading the file");
+        };
+      } else {
+        reject("File format of the selected file is not CSV");
+      }
+    });
+  }
 
   const fileProcessingPromises = [];
 
@@ -398,7 +423,7 @@ function processFile(file) {
     if (target.files.length > 1) {
       console.log("Number of files selected: ", target.files.length);
     }
-    else if(target.files.length === 1) {
+    else if (target.files.length === 1) {
       console.log("1 file selected")
     }
     // const name = target.accept.includes("image") ? "images" : "videos";
@@ -416,65 +441,139 @@ function processFile(file) {
       fileProcessingPromises.push(processFile(target.files[i]));
     }
 
-    // Use Promise.all to wait for all promises to resolve
     Promise.all(fileProcessingPromises)
       .then(() => {
-      // This code will run after all files have been processed
-      for (let i = 0; i < file_names.length - 1; i++) {
-        for (let j = i + 1; j < file_names.length; j++) {
-          const commonHeaders = headers[i].filter(header => headers[j].includes(header));
+        // This code will run after all files have been processed
+        for (let i = 0; i < file_names.length - 1; i++) {
+          for (let j = i + 1; j < file_names.length; j++) {
+            console.log('headers[i]', headers[i]);
+            const commonHeaders = headers[i].filter(header => headers[j].includes(header));
 
-          if (commonHeaders.length > 0) {
-            console.log(`Common headers between ${file_names[i]} and ${file_names[j]}:`, commonHeaders);
-            console.log(`Tables: ${file_names[i]}, ${file_names[j]}`);
-          } else {
-            console.log(`No common headers between ${file_names[i]} and ${file_names[j]}.`);
+            if (commonHeaders.length > 0) {
+              console.log(`Common headers between ${file_names[i]} and ${file_names[j]}:`, commonHeaders);
+              console.log(`Tables: ${file_names[i]}, ${file_names[j]}`);
+            } else {
+              console.log(`No common headers between ${file_names[i]} and ${file_names[j]}.`);
+            }
           }
         }
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 
+    const files = Array.from(target.files);
+    let fileIndex = 0;
+    let allHeaders = [];
+    let allFileNames = [];
 
-
-
-    // Check if the selected file has a CSV MIME type
-    if (target.files[0].type === "text/csv") {
-    // Example usage
-    // const headers = ['_id', 'Name', 'val'];
-    // const fileName = 'OrgId.csv';
-    // const schema = generateJsonSchema(headers, fileName);
-
-    // console.log(JSON.stringify(schema, null, 2));
-
-      fileReader.readAsText(target.files[0]);
-      const file_name = target.files[0].name;
-      fileReader.onload = (e) => {
-        let csvData = e.target.result;
-        // Parse the CSV data into an array or process it as needed
-        // For example, you can use a CSV parsing library or split the lines manually
-        const rows = csvData.split('\n');
-        const header = rows[0].split(',');
-        console.log(header);
-        // console.log(rows.slice(1));
-        console.log(file_name); 
-        const schema = generateJsonSchema(header, file_name);
-        console.log('schema ', schema)
-        setNodes(schema.rawData.nodes);
-        setEdges(schema.rawData.edges);
-        setConstraints(schema.rawData.constraints);
-
+    const generateJsonStructure = (filenames, headers) => {
+      const determineType = (header) => {
+        const lowerHeader = header.toLowerCase();
+        if (lowerHeader === 'name' || lowerHeader === 'phno') {
+          return 'string';
+        } else if (lowerHeader === '_id') {
+          return 'Obj';
+        } else {
+          return 'num';
+        }
       };
-    } else {
-      // Handle the case where a non-CSV file is selected (e.g., show an error message)
-      // alert
-      alert("Please select a CSV file!");
-      console.log("Please select a CSV file.");
-    }
 
+      const tables = filenames.map((filename, index) => {
+        return {
+          link_to_file: "/",
+          table_name: filename.split('.')[0],
+          attributes: headers[index].map(name => ({ name, type: determineType(name) })),
+          attribute_count: headers[index].length,
+          constraints: {}
+        };
+      });
+
+      const nodes = tables.flatMap((table, i) => {
+        const parent = {
+          id: `${i + 1}`,
+          type: "parent",
+          position: { x: 10, y: 5 + i * 300 },
+          data: {
+            tableName: table.table_name,
+            link_to_file: "/",
+            attribute_count: table.attribute_count
+          },
+          style: {
+            width: 244,
+            height: 90 + 70 * table.attribute_count
+          }
+        };
+        const children = table.attributes.map((attr, j) => {
+          return {
+            id: `${i + 1}_${j}`,
+            type: "child",
+            position: { x: 10, y: 50 + j * 70 },
+            data: attr,
+            parentNode: `${i + 1}`,
+            extent: "parent",
+            draggable: false,
+            style: { width: 224 }
+          };
+        });
+        return [parent, ...children];
+      });
+
+      const finalStructure = {
+        table_num: filenames.length,
+        tables,
+        relations: [],
+        rawData: {
+          nodes,
+          edges: [],
+          constraints: {}
+        }
+      };
+
+      return finalStructure;
+    };
+
+    // Function to process reading each CSV file
+    const processFiles = (fileIndex) => {
+      if (fileIndex >= files.length) {
+        // Once all files are processed, generate the full schema and set the states
+        const result = generateJsonStructure(allFileNames, allHeaders);
+        // useEffect(() => { console.log('Updated Edges:', edges); }, [edges]);
+        // useEffect(() => { console.log('Updated Nodes:', nodes); }, [nodes]);
+        // useEffect(() => { console.log('Updated Constraints:', constraints); }, [constraints]);
+        setNodes([]);
+        setTimeout(() => {
+          setNodes(result.rawData.nodes)
+        }, 1);
+        setEdges([]);
+        setTimeout(() => {
+          setEdges(result.rawData.edges)
+        }, 1);
+        setConstraints([]);
+        setTimeout(() => {
+          setConstraints(result.rawData.constraints)
+        }, 1);
+        return;
+      }
+
+      const fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        const text = e.target.result;
+        const headers = text.split(/\r\n|\n/)[0].split(','); // Split the first line to get headers
+        allHeaders.push(headers); // Store headers for schema generation
+        allFileNames.push(files[fileIndex].name); // Store file name for schema generation
+        processFiles(fileIndex + 1); // Recursively process the next file
+      };
+      fileReader.onerror = (e) => {
+        console.error('File could not be read!', e.target.error);
+      };
+
+      fileReader.readAsText(files[fileIndex]); // Read the file as text
+    };
+
+    processFiles(0); // Start processing from the first file
   };
+
   const handleChangeConstraint = (event, name) => {
     console.log(event.target.value, name, tableId);
     let temp = constraints;
@@ -607,9 +706,9 @@ function processFile(file) {
   );
   const onConnect = useCallback(
     (connection) => {
-      {/*console.log(connection);*/}
+      {/*console.log(connection);*/ }
       let nodes = JSON.parse(localStorage.getItem("null-db1-data")).nodes || [];
-     {/*console.log(nodes);*/}
+      {/*console.log(nodes);*/ }
       let data = {};
       let tb1ID = connection.source.split("_")[0];
       let fk1ID =
@@ -637,15 +736,15 @@ function processFile(file) {
   );
 
   const deleteTable = (id) => {
-    console.log('id' , id)
+    console.log('id', id)
     let newNode = nodes.filter((x) => x.id.split("_")[0] != id.toString());
     let newEdge = edges.filter(
       (x) =>
         x.source.split("_")[0] != id.toString() &&
         x.target.split("_")[0] != id.toString()
     );
-    console.log('newNodes',newNode)
-    console.log('newEdge',newEdge)
+    console.log('newNodes', newNode)
+    console.log('newEdge', newEdge)
     setNodes(newNode);
     setEdges(newEdge);
   };
