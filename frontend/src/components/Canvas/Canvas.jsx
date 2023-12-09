@@ -43,7 +43,10 @@ import RedoIcon from "@mui/icons-material/Redo";
 import PreviewIcon from "@mui/icons-material/Preview";
 import CodeIcon from "@mui/icons-material/Code";
 
-function generateJsonStructure(filenames, headers) {
+function generateJsonStructure(filenames, headers, foreign_keys, primary_keys) {
+  console.log("headers in generate JSON: ", headers);
+  console.log("file_names in generate JSON: ", filenames);
+  console.log("foreign_keys in generate JSON: ", foreign_keys);
   const determineType = (header) => {
     const lowerHeader = header.toLowerCase();
     if (lowerHeader === 'name' || lowerHeader === 'phno') {
@@ -102,9 +105,14 @@ function generateJsonStructure(filenames, headers) {
     rawData: {
       nodes,
       edges: [],
-      constraints: {}
+      constraints: {},
+      primary_key : [],
+      foreign_key : []
     }
   };
+  // console.log("headers in generate JSON: ", headers);
+  // console.log("file_names in generate JSON: ", filenames);
+  // console.log("111")
 
   return JSON.stringify(finalStructure, null, 4);
 }
@@ -327,12 +335,22 @@ export default function Canvas({
 }) {
   const [nodes, setNodes] = React.useState(initialNodes);
   const [edges, setEdges] = React.useState(initialEdges);
+  const [pkeys, setPkeys] = React.useState({});
+  const [fkeys, setFkeys] = React.useState({});
+
+
   useEffect(() => {
     console.log('Updated Edges:', edges);
   }, [edges]);
   useEffect(() => {
     console.log('Updated Nodes:', nodes);
   }, [nodes]);
+  useEffect(() => {
+    console.log("Updated Pkeys:", pkeys);
+  }, [pkeys]);
+  useEffect(() => {
+    console.log("Updated Fkeys:", fkeys);
+  }, [fkeys]);
 
   const [constraints, setConstraints] = React.useState({});
   const [eOpen, setEOpen] = useState(false);
@@ -360,6 +378,8 @@ export default function Canvas({
   const onImport = () => { };
   const file_names = [];
   const headers = [];
+  // const foreign_keys = [];
+  // const primary_keys = [];
 
   function processFile(file) {
     return new Promise((resolve, reject) => {
@@ -397,7 +417,7 @@ export default function Canvas({
           Object.keys(columnUniqueValues).forEach(column => {
             const uniqueValues = Array.from(columnUniqueValues[column]);
             if (uniqueValues.length === rows.length - 1) {
-              console.log(`Column ${column} has unique values in each row.`);
+              console.log(`Column ${column} can be a primary key for table ${file_name}`);
             }
           });
 
@@ -414,9 +434,6 @@ export default function Canvas({
   }
 
   const fileProcessingPromises = [];
-
-
-
 
   const handleCapture = ({ target }) => {
     const fileReader = new FileReader();
@@ -452,6 +469,18 @@ export default function Canvas({
             if (commonHeaders.length > 0) {
               console.log(`Common headers between ${file_names[i]} and ${file_names[j]}:`, commonHeaders);
               console.log(`Tables: ${file_names[i]}, ${file_names[j]}`);
+              console.log("table1: ", file_names[i]);
+              console.log("table2: ", file_names[j]);
+              console.log("table_1_fkey: ", commonHeaders);
+              console.log("table_2_fkey: ", commonHeaders);
+              // Add this entry into foreign_keys array as table1:file_names[i], table2:file_names[j], table_1_fkey:commonHeaders, table_2_fkey:commonHeaders
+              foreign_keys.push({
+                table1: file_names[i],
+                table2: file_names[j],
+                table_1_fkey: commonHeaders,
+                table_2_fkey: commonHeaders
+              });
+
             } else {
               console.log(`No common headers between ${file_names[i]} and ${file_names[j]}.`);
             }
@@ -468,6 +497,67 @@ export default function Canvas({
     let allFileNames = [];
 
     const generateJsonStructure = (filenames, headers) => {
+      console.log("headers in generate JSON new: ", headers);
+      console.log("file_names in generate JSON new: ", filenames);
+
+      const primary_keys = [];
+      const foreign_keys = [];
+      console.log("foreign_keys in generate JSON new: ", foreign_keys);
+      console.log("primary keys in generate JSON new: ", primary_keys);
+      for (let i = 0; i < file_names.length - 1; i++) {
+          for (let j = i + 1; j < file_names.length; j++) {
+            console.log('headers[i]', headers[i]);
+            const commonHeaders = headers[i].filter(header => headers[j].includes(header));
+
+            if (commonHeaders.length > 0) {
+              // console.log(`Common headers between ${file_names[i]} and ${file_names[j]}:`, commonHeaders);
+              // console.log(`Tables: ${file_names[i]}, ${file_names[j]}`);
+              // console.log("table1: ", file_names[i]);
+              // console.log("table2: ", file_names[j]);
+              // console.log("table_1_fkey: ", commonHeaders);
+              // console.log("table_2_fkey: ", commonHeaders);
+              console.log("Making foreign keys!")
+              // Add this entry into foreign_keys array as table1:file_names[i], table2:file_names[j], table_1_fkey:commonHeaders, table_2_fkey:commonHeaders
+              foreign_keys.push({
+                table1: file_names[i],
+                table2: file_names[j],
+                table_1_fkey: commonHeaders,
+                table_2_fkey: commonHeaders
+              });
+
+            } else {
+              console.log(`No common headers between ${file_names[i]} and ${file_names[j]}.`);
+            }
+          }
+        }
+
+        for (let i = 0; i < file_names.length; i++) {
+          const table_name = file_names[i];
+          const table_headers = headers[i];
+          const table_primary_keys = [];
+
+          for (let j = 0; j < table_headers.length; j++) {
+            const column_name = table_headers[j];
+            const column_values = headers.map(h => h[j]);
+
+            // Check if all values in the column are unique
+            if (new Set(column_values).size === column_values.length) {
+              table_primary_keys.push(column_name);
+            }
+          }
+
+          // Store the primary keys for the current table
+          primary_keys.push({
+            table_name,
+            keys: table_primary_keys
+          });
+        }
+
+
+
+        console.log('foreign keys later: ', foreign_keys);
+        console.log('primary keys later: ', primary_keys);
+
       const determineType = (header) => {
         const lowerHeader = header.toLowerCase();
         if (lowerHeader === 'name' || lowerHeader === 'phno') {
@@ -518,17 +608,34 @@ export default function Canvas({
         });
         return [parent, ...children];
       });
+      
+      // it should be of the format table1, table2 , table1_fk, table2_fk. Use file_names and headers
+
+      
+      console.log("type of tables: ", typeof tables);
+      console.log("type of foreign_keys: ", typeof foreign_keys);
+      console.log("type of primary_keys: ", typeof primary_keys);
+      console.log("tables: ", tables);
+      console.log("foreign_keys: ", foreign_keys);
+      console.log("primary_keys: ", primary_keys);
 
       const finalStructure = {
         table_num: filenames.length,
         tables,
         relations: [],
+        primary_keys: primary_keys, // Include primary_keys here
+        foreign_keys: foreign_keys, // Include foreign_keys here
+
         rawData: {
           nodes,
           edges: [],
-          constraints: {}
+          constraints: {},
+          primary_keys: primary_keys, // Include primary_keys here
+          foreign_keys: foreign_keys, // Include foreign_keys here
+
         }
       };
+      console.log("finalStructure: ", finalStructure);
 
       return finalStructure;
     };
@@ -553,6 +660,13 @@ export default function Canvas({
         setTimeout(() => {
           setConstraints(result.rawData.constraints)
         }, 1);
+        setTimeout(() => {
+          setPkeys(result.rawData.primary_keys)
+        }, 1);
+        setTimeout(() => {
+          setFkeys(result.rawData.foreign_keys)
+        }, 1);
+        
         return;
       }
 
@@ -609,6 +723,8 @@ export default function Canvas({
   // }, 5000);
 
   const genFile = (data) => {
+    console.log("Data exported",data);
+
     const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
       JSON.stringify(data)
     )}`;
@@ -820,6 +936,10 @@ export default function Canvas({
                 nodes: nodes,
                 edges: edges,
                 constraints: constraints,
+                // also add primary keys and foreign keys here
+                //console log pkeys and fkeys here
+                primary_keys: pkeys,
+                foreign_keys: fkeys,
               });
               alert("sending data via api : API Needed");
             }}
@@ -914,11 +1034,15 @@ export default function Canvas({
             color="info"
             fullWidth
             onClick={() => {
+              console.log("pkeys in export: ", pkeys);
+              console.log("fkeys in export: ", fkeys);
               genFile(
                 exportJSON({
                   nodes: nodes,
                   edges: edges,
                   constraints: constraints,
+                  primary_keys: pkeys,
+                  foreign_keys: fkeys,
                 })
               );
             }}
