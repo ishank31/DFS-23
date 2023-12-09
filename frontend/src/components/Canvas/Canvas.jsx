@@ -374,6 +374,7 @@ export default function Canvas({
       canRedo,
     },
   ] = useUndo({});
+  console.log("local data", local);
   const { present: localStore } = local;
   const onImport = () => { };
   const file_names = [];
@@ -703,14 +704,20 @@ export default function Canvas({
   };
 
   useEffect(() => {
+    console.log("set local fkeys: ", fkeys);
+    console.log("set local pkeys: ", pkeys);
     setLocal({
       nodes: nodes,
       edges: edges,
       constraints: constraints,
+      // add primary keys and foreign keys here
+      primary_keys: pkeys,
+      foreign_keys: fkeys,
     });
-  }, [nodes, edges, constraints]);
+  }, [nodes, edges, constraints, pkeys, fkeys]);
 
   useEffect(() => {
+    console.log("localStore", localStore);
     localStorage.setItem("null-db1-data", JSON.stringify(localStore));
   }, [localStore]);
 
@@ -1036,6 +1043,13 @@ export default function Canvas({
             onClick={() => {
               console.log("pkeys in export: ", pkeys);
               console.log("fkeys in export: ", fkeys);
+              console.log("json file exported:", exportJSON({
+                  nodes: nodes,
+                  edges: edges,
+                  constraints: constraints,
+                  primary_keys: pkeys,
+                  foreign_keys: fkeys,
+                }))
               genFile(
                 exportJSON({
                   nodes: nodes,

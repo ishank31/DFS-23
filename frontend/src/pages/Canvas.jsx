@@ -46,10 +46,13 @@ export default function CanvasPage() {
  
   const exportJSON = () => {
     let data = JSON.parse(localStorage.getItem("null-db1-data"));
+    console.log("data in ExportJSON: ",data);
     let expData = {};
     let nodes = data.nodes;
     let edges = data.edges;
     let constraints = data.constraints;
+    let primaryKeys = data.primary_keys;
+    let foreignKeys = data.foreign_keys;
     let tbCnt = nodes.filter((x) => x.id.split("_").length === 1);
     let tables = [];
     tbCnt.forEach((x) => {
@@ -83,7 +86,9 @@ export default function CanvasPage() {
     expData.tables = tables;
     expData.relations = relations;
     expData.rawData=data;
-    console.log(expData);
+    expData.primaryKeys = primaryKeys; // Add primary keys
+    expData.foreignKeys = foreignKeys; // Add foreign keys
+    console.log("expData which will be exported",expData);
     return expData;
   };
 
